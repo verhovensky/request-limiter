@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "request-limiter"
+version = "0.1.0"
+description = "Simple rate limiter, cache and FastAPI based."
+authors = ["verhovensky <voinywolnyprod@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.105.0"
+redis = "^5.0.1"
+pydantic-settings = "^2.1.0"
+aiojobs = "^1.2.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
