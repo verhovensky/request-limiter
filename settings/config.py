@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -8,8 +8,14 @@ class Settings(BaseSettings):
     CHAT_BOT_WEBHOOK_URL: str = "https://chatbot.com/webhook"
     # Запросы должны троттлиться до 8 RPS
     THROTTLING_LIMIT: int = 8
+    # CORS
+    BACKEND_CORS_ORIGINS: list[str] = []
+    # Localhost by default
+    ALLOWED_HOSTS: list[str] = ["localhost", "127.0.0.1"]
 
-    model_config = SettingsConfigDict(env_file=".env")
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
 
 
 settings = Settings()
