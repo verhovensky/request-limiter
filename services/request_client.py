@@ -36,7 +36,7 @@ class ChatBotWebhookAdapter:
         try:
             response = ChatBotWebhookAdapter.client.request(
                 method=method,
-                url="https://httpbin.org/status/200",
+                url=url,
                 headers={"Content-Type": "application/json", "X-Celery-ID": task_id},
                 data=json.dumps(data) if data else {},
             )
