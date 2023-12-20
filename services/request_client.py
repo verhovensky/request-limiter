@@ -5,6 +5,7 @@ from urllib.error import HTTPError
 import backoff
 import requests
 from requests.adapters import HTTPAdapter
+from requests.exceptions import InvalidJSONError, JSONDecodeError
 from starlette import status
 
 from settings.config import settings
@@ -25,7 +26,7 @@ class ChatBotWebhookAdapter:
         backoff.expo,
         (requests.RequestException, requests.JSONDecodeError, HTTPError),
         max_tries=4,
-        jitter=None,
+        max_time=300,
         on_giveup=chatbot_logger.error("Max retries exceeded"),
     )
     def _make_request(
@@ -35,13 +36,18 @@ class ChatBotWebhookAdapter:
         try:
             response = ChatBotWebhookAdapter.client.request(
                 method=method,
-                url=url,
+                url="https://httpbin.org/status/200",
                 headers={"Content-Type": "application/json", "X-Celery-ID": task_id},
                 data=json.dumps(data) if data else {},
             )
             response.raise_for_status()
             data = response.json()
-        except (requests.RequestException, requests.JSONDecodeError, HTTPError) as exc:
+        except (
+            requests.RequestException,
+            InvalidJSONError,
+            JSONDecodeError,
+            HTTPError,
+        ) as exc:
             chatbot_logger.error(
                 f"[ChatBotWebhookAdapter] Ошибка при запросе {exc}",
                 extra={

@@ -12,36 +12,56 @@ class LimiterService:
     RATE_LIMIT = settings.THROTTLING_LIMIT
 
     @staticmethod
-    def get_redis_key() -> tuple[str, datetime]:
-        """Получает ключ для текущей минуты в UTC
-        Используем для кеша запросов в Redis"""
+    async def get_redis_key() -> tuple[str, datetime]:
+        """Получает ключ для текущей секунды в UTC в ISO формате + наш ключ
+        Используем для кеша запросов в Redis
+        прим. 'REDIS_KEY_2023-12-20T11:45:05'"""
         now: datetime = datetime.utcnow()
-        current_minute: str = now.strftime("%Y-%m-%dT%H:%M")
-        return f"{LimiterService.REDIS_KEY}_{current_minute}", now
+        current_second: str = now.isoformat(sep="T", timespec="seconds")
+        return f"{LimiterService.REDIS_KEY}_{current_second}", now
 
     @staticmethod
     async def increase_rate_limit(
         is_first_request: bool = False,
     ) -> dict[str, int | bool]:
-        """Увеличивает кол-во в ключе redis_minute_key, и инвалидирует ключ через минуту,
-        т.к. у нас лимит в минуту. is_first_request возможно нужен для расширения функционала, дебага.
+        """Увеличивает кол-во в ключе redis_minute_key, и инвалидирует ключ через секунду,
+        т.к. у нас лимит в секунду. is_first_request возможно нужен для расширения функционала, дебага.
         """
-        redis_minute_key, now = LimiterService.get_redis_key()
-        current_count: int = await settings.REDIS_CLIENT.incr(redis_minute_key)
+        redis_minute_key, now = await LimiterService.get_redis_key()
+        current_count: int = await settings.REDIS_CLIENT.incrby(redis_minute_key)
         # в таске потом проверяем текущее значение по ключу для текущей минуты в UTC
         if current_count == 1:
             await settings.REDIS_CLIENT.expireat(
-                name=LimiterService.REDIS_KEY, when=now + timedelta(minutes=1)
+                name=LimiterService.REDIS_KEY, when=now + timedelta(seconds=1)
             )
             is_first_request = True
-        limiter_logger.info(f"[LimiterService] Rate Limit увеличен до {current_count}")
-        return {"current_count": current_count, "is_first_request": is_first_request}
+        result = {"current_count": current_count, "is_first_request": is_first_request}
+        limiter_logger.info(
+            f"[LimiterService] Rate Limit увеличен до {current_count}",
+            extra={"data": result},
+        )
+        return result
 
     @staticmethod
-    def check_rate_limit():
+    async def decrease_rate_limit() -> bool:
+        """Убавляем каунтер в ключе Redis по секунде, если есть"""
+        redis_minute_key, now = await LimiterService.get_redis_key()
+        current_count: int = await settings.REDIS_CLIENT.decrby(redis_minute_key)
+        return bool(current_count)
+
+    @staticmethod
+    async def check_rate_limit() -> bool:
         """Проверяет текущее количество запросов к бекенду чатбота.
         Этот ключ лежит в Redis и увеличивается/уменьшается в зависимости от того,
-        Когда совершается непосредственно POST запрос на сервис."""
+        Когда совершается непосредственно POST запрос к бекенду чатбота."""
+
+        redis_key, now = await LimiterService.get_redis_key()
+        current_count: int | None = await settings.REDIS_CLIENT.get(redis_key)
+        if current_count is None:
+            return True
+        if current_count >= settings.THROTTLING_LIMIT:
+            return False
+        return True
 
     @staticmethod
     async def _make_hash(data: dict) -> str:
