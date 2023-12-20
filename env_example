@@ -3,3 +3,6 @@ CHAT_BOT_WEBHOOK_URL=https://chatbot.com/webhook
 THROTTLING_LIMIT=8
 BACKEND_CORS_ORIGINS='["https://yourdomain.com", "https://otheryourdomain.com"]'
 ALLOWED_HOSTS='["127.0.0.1", "localhost"]'
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASS=

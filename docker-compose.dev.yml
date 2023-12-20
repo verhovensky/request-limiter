@@ -16,39 +16,5 @@ services:
       - "6379:6379"
     # command: ["sh", "-c", "exec redis-server --requirepass \"$REDIS_PASS\""]
 
-  rate_limiter:
-    depends_on:
-      - postgres
-    restart: "unless-stopped"
-    volumes:
-      - ./:/build/
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    env_file:
-      - .env
-    ports:
-      - "8000:8000"
-
-  nginx:
-    build:
-      context: ./nginx
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -s -o /dev/null -I -w '%{http_code}' http://0.0.0.0:9991/ | grep '200' || exit 1" ]
-      interval: 10s
-      timeout: 30s
-      retries: 10
-      start_period: 10s
-    depends_on:
-      - rate_limiter
-    env_file:
-      - .env
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ${SSL_CERTIFICATE}:/etc/nginx/certs/cert.pem:ro
-      - ${SSL_CERTIFICATE_KEY}:/etc/nginx/certs/key.pem:ro
-
 volumes:
   redis:
