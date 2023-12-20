@@ -22,6 +22,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+    command: run_server
     env_file:
       - .env
     ports:
@@ -52,7 +53,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    command: celery -A worker.celery worker -Q celery,high_priority --loglevel=info --logfile=logs/celery.log
+    command: run_celery
     env_file:
       - .env
     environment:
@@ -68,7 +69,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    command: celery -A worker.celery flower --port=5555 --loglevel=debug
+    command: run_flower
     env_file:
       - .env
     ports:

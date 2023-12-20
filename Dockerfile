@@ -3,10 +3,6 @@ FROM python:3.11.1-slim-bullseye
 ENV PYTHONUNBUFFERED 1
 WORKDIR /build
 
-# Создаем venv, добавляем в PATH, устанавливаем зависимости из requirements.txt
-RUN python -m venv /venv
-ENV PATH="/venv/bin:$PATH"
-
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
