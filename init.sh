@@ -10,5 +10,5 @@ fi
 
 if [ "$1" = "run_server" ]; then
   echo "Run server"
-  exec gunicorn app.main:app --config file:gunicorn.conf.py
+  exec gunicorn main:app --config file:gunicorn.conf.py
 fi
