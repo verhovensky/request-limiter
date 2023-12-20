@@ -1,8 +1,5 @@
 version: "3.7"
 
-# Само приложение, Nginx + Redis
-# docker-compose -f docker-compose.dev.yml up -d
-
 
 services:
   redis:

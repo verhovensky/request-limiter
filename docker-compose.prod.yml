@@ -1,8 +1,5 @@
 version: "3.7"
 
-# Само приложение, Nginx + Redis
-# docker-compose -f docker-compose.dev.yml up -d
-
 
 services:
   redis:
@@ -54,7 +51,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    command: celery -A worker.celery worker --loglevel=info
+    command: celery -A worker.celery worker -Q celery,high_priority --loglevel=info --logfile=logs/celery.log
     env_file:
       - .env
     environment:
@@ -64,6 +61,25 @@ services:
       - ./:/build/
     depends_on:
       - rate_limiter
+      - redis
+
+  flower:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: celery -A worker.celery flower --port=5555 --loglevel=debug
+    env_file:
+      - .env
+    ports:
+      - 5556:5555
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+    volumes:
+      - ./:/build/
+    depends_on:
+      - rate_limiter
+      - celery_worker
       - redis
 
 volumes:

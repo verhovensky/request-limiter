@@ -8,6 +8,7 @@ from schemas.enums import EventTypesEnum
 from schemas.requests import ViberBaseRequest
 from schemas.responses import (ConversationResponseSchema,
                                MessageResponseSchema, WebhookResponseSchema)
+from tasks.request_tasks import process_incoming_request
 
 router = APIRouter()
 endpoints_logger = getLogger(__name__)
@@ -35,6 +36,9 @@ async def accept_viber_requests(
             status_code=status.HTTP_200_OK, content=conversation_response
         )
     elif data.event == EventTypesEnum.message:
-        endpoints_logger.info("[accept_viber] Получен event=message")
-        # заменить
+        to_json_data: dict = data.model_dump(mode="json")
+        endpoints_logger.info(
+            "[accept_viber] Получен event=message", extra=to_json_data
+        )
+        process_incoming_request.apply_async(kwargs=to_json_data)
         return JSONResponse(status_code=status.HTTP_200_OK, content={})

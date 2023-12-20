@@ -8,6 +8,9 @@ class ViberBaseRequest(BaseModel):
     timestamp: str
     chat_hostname: str
     message_token: int
+    sender: dict | None
+    message: dict | None
+    silent: bool | None
 
     @field_validator("event")
     def is_event_processable(cls, value):
