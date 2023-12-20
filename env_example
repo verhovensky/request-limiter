@@ -6,3 +6,5 @@ ALLOWED_HOSTS='["127.0.0.1", "localhost"]'
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASS=
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0

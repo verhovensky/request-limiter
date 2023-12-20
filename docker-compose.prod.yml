@@ -50,5 +50,21 @@ services:
       - ${SSL_CERTIFICATE}:/etc/nginx/certs/cert.pem:ro
       - ${SSL_CERTIFICATE_KEY}:/etc/nginx/certs/key.pem:ro
 
+  celery_worker:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: celery -A worker.celery worker --loglevel=info
+    env_file:
+      - .env
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+    volumes:
+      - ./:/build/
+    depends_on:
+      - rate_limiter
+      - redis
+
 volumes:
   redis:

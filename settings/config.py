@@ -9,6 +9,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # TTL in seconds
     CELERY_TASK_ID_TTL: int = 3600
+    RATE_LIMIT_REDIS_KEY: str = "RPS_LIMIT"
     # URL для передачи запроса его в первозданном виде
     CHAT_BOT_WEBHOOK_URL: str = "https://chatbot.com/webhook"
     # Запросы должны троттлиться до 8 RPS
@@ -23,6 +24,10 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_PASS: str | None = None
     REDIS_CLIENT: redis.Redis | None = None
+
+    # Celery
+    CELERY_BROKER_URL: str = "redis://localhost:6379"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379"
 
     @field_validator("REDIS_CLIENT")
     def _assemble_redis_client(cls, v: str, values: ValidationInfo) -> redis.Redis:
