@@ -5,7 +5,7 @@ if [ "$1" = "run_celery" ]; then
 fi
 
 if [ "$1" = "run_flower" ]; then
-  celery -A worker.celery flower --port=5555 --loglevel=debug
+  celery -A worker.celery --broker=redis://redis flower --port=5555 --address=0.0.0.0 --loglevel=debug
 fi
 
 if [ "$1" = "run_server" ]; then
