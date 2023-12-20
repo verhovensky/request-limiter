@@ -22,6 +22,6 @@ RUN addgroup --gid 1001 --system uvicorn && \
 
 # Run init.sh script then start uvicorn
 RUN chown -R uvicorn:uvicorn /build
-RUN chmod +xr init.sh
+RUN chmod +xr app/init.sh
 ENTRYPOINT ["/bin/bash", "init.sh"]
 EXPOSE 8000

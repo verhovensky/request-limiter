@@ -15,7 +15,7 @@ services:
 
   rate_limiter:
     depends_on:
-      - postgres
+      - redis
     restart: "unless-stopped"
     volumes:
       - ./:/build/
@@ -43,9 +43,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ${SSL_CERTIFICATE}:/etc/nginx/certs/cert.pem:ro
-      - ${SSL_CERTIFICATE_KEY}:/etc/nginx/certs/key.pem:ro
+# Раскомментировать, если добавляем SSL (можно сгенирировать свой через openssl утилиту в Linux)
+#    volumes:
+#      - ${SSL_CERTIFICATE}:/etc/nginx/certs/cert.pem:ro
+#      - ${SSL_CERTIFICATE_KEY}:/etc/nginx/certs/key.pem:ro
 
   celery_worker:
     build:

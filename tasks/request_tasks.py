@@ -25,7 +25,6 @@ async def process_incoming_request(self: Task, *args, **kwargs) -> bool:
     """Обработать запрос, проверить дубликаты через LimiterService,
     отправить запрос с ID таски на сервер чатбота при помощи ChatBotWebhookAdapter
     И НЕ ЗАБЫТЬ DECREASE сделать у ключа таски"""
-    task_logger.info(f"[process_incoming_request] Таска запущена с {kwargs}")
     result: dict | bool = await LimiterService.process_request(request_data=kwargs)
     if result is False:
         task_logger.info(
