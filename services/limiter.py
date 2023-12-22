@@ -56,10 +56,11 @@ class LimiterService:
         Когда совершается непосредственно POST запрос к бекенду чатбота."""
 
         redis_key, now = await LimiterService.get_redis_key()
-        current_count: int | None = await settings.REDIS_CLIENT.get(redis_key)
+        current_count: bytes | None = await settings.REDIS_CLIENT.get(redis_key)
         if current_count is None:
             return True
-        if current_count >= settings.THROTTLING_LIMIT:
+        count = int(current_count)
+        if count >= settings.THROTTLING_LIMIT:
             return False
         return True
 

@@ -40,5 +40,7 @@ async def accept_viber_requests(
         endpoints_logger.info(
             "[accept_viber] Получен event=message", extra=to_json_data
         )
-        process_incoming_request.apply_async(kwargs=to_json_data)
-        return JSONResponse(status_code=status.HTTP_200_OK, content={})
+        task = process_incoming_request.apply_async(kwargs=to_json_data)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK, content={"task_id": task.id}
+        )
